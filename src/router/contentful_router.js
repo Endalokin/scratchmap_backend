@@ -16,6 +16,7 @@ router.get('/experiences/:id', (req, res) => {
 })
 
 router.get('/images', contentfulController.getImages)
-router.get('/images/colour', contentfulController.getExperiencesImgColoured)
+router.get('/images/colour', contentfulController.getColour)
+router.post('/images/colour', contentfulController.postColour)
 
 export default router;
