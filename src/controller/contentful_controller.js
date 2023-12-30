@@ -41,14 +41,15 @@ async function handleContent(content_type) {
           id: i.sys.id,
           ...i.fields,
           imgUrl: imgUrl,
-          imgColour: imgColour.imgcolour,
+          imgColour: imgColour.imgdominantcolour,
+          imgAccentColour: imgColour.imgaccentcolour,
         };
       } else {
         return {
           id: i.sys.id,
           ...i.fields,
           imgUrl: imgUrl,
-        };       
+        };
       }
     }
     return {
@@ -77,24 +78,30 @@ async function handleImage(asset_id) {
 }
 
 async function handleColour(imgUrl, id, res) {
+  console.log(imgUrl, id)
   const colourUrl = `https://api.sightengine.com/1.0/check.json?url=${imgUrl}&models=properties&api_user=${sightengine_user}&api_secret=${sightengine_secret}`;
   let result;
   await fetchData(colourUrl, (data) => {
+
     result = {
-      hex: data.colors.dominant.hex,
+      dominantHex: data.colors.dominant.hex,
       r: data.colors.dominant.r,
       g: data.colors.dominant.g,
-      b: data.colors.dominant.b,
+      b: data.colors.dominant.b
     };
+    if(data.colors.accent) {
+      result.accentHex = data.colors.accent[0].hex
+      console.log(result)
+    }
     pool
-      .query("insert into Colours (imgId, imgColour) values ($1, $2)", [
+      .query("insert into Colours (imgId, imgdominantcolour, imgaccentcolour) values ($1, $2, $3)", [
         id,
-        result.hex,
+        result.dominantHex,
+        result.accentHex
       ])
       .then((data) => res.sendStatus(201))
       .catch((err) => res.json({ msg: "transfer in db failed", err }));
   });
-  return result;
 }
 
 export const contentfulController = {
@@ -122,7 +129,7 @@ export const contentfulController = {
   },
 
   getColour: (req, res) => {
-    console.log(req.query)
+    console.log(req.query);
     const imgUrl = `http://images.ctfassets.net/q0wjbbqqoctx/6r9CWxa8KrJGAQ3tZJRGXA/d1c81f7b8a28a8635da9a7033fb80364/DSC04208.JPG`;
     const colourUrl = `https://api.sightengine.com/1.0/check.json?url=${imgUrl}&models=properties&api_user=${sightengine_user}&api_secret=${sightengine_secret}`;
     fetchData(colourUrl, (data) => {
@@ -130,6 +137,6 @@ export const contentfulController = {
     });
   },
   postColour: (req, res) => {
-    handleColour(req.query.url, req.query.id, res)
+    handleColour(req.query.url, req.query.id, res);
   },
 };
