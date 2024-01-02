@@ -1,3 +1,5 @@
+// This Router is deprecated! To be deleted!
+
 import express from 'express'
 import { contentfulController } from '../controller/contentful_controller.js'
 
