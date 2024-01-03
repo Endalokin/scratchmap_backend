@@ -6,32 +6,31 @@ import handleContent from "../utils/handleContent.js";
 const CARBONTRACER_KEY = process.env.CARBONTRACER_KEY;
 
 async function handleFootprint(id, body, res) {
-  console.log(id);
-  console.log(body);
-  res.send("okay");
-  /* const carbonTracerUrl = `https://api.sightengine.com/1.0/check.json?url=${imgUrl}&models=properties&api_user=${sightengine_user}&api_secret=${sightengine_secret}`;
-    let result;
-    await fetchData(colourUrl, (data) => {
-  
-      result = {
-        dominantHex: data.colors.dominant.hex,
-        r: data.colors.dominant.r,
-        g: data.colors.dominant.g,
-        b: data.colors.dominant.b
-      };
-      if(data.colors.accent) {
-        result.accentHex = data.colors.accent[0].hex
-        console.log(result)
-      }
-      pool
-        .query("insert into Colours (imgId, imgdominantcolour, imgaccentcolour) values ($1, $2, $3)", [
+  const carbonTracerUrl = `https://api.carbontracer.uni-graz.at/routing/${CARBONTRACER_KEY}/${body.vehicle}/${body.placeDeparture}/${body.placeArrival}`;
+  let result;
+  await fetchData(carbonTracerUrl, (data) => {
+    result = {
+      distanceDirect: data.response.data.distanceDirect * 2,
+      distanceRoute: data.response.data.distanceRoute * 2,
+      emission: body.vehicle == "car" ? data.response.data.co2eq * 2 / body.travellers : data.response.data.co2eq * 2,
+      amount: body.vehicle == "car" ? (data.response.data.co2eq * 2 / body.travellers / 1000) * 30 : (data.response.data.co2eq * 2 / 1000) * 30,
+      time: data.response.data.time,
+    };
+    pool
+      .query(
+        "insert into footprint (travelid, distance, emission, amount, compensated, time) values ($1, $2, $3, $4, $5, $6)",
+        [
           id,
-          result.dominantHex,
-          result.accentHex
-        ])
-        .then((data) => res.sendStatus(201))
-        .catch((err) => res.json({ msg: "transfer in db failed", err }));
-    }); */
+          result.distanceRoute,
+          result.emission,
+          result.amount,
+          false,
+          result.time,
+        ]
+      )
+      .then((data) => res.status(201).json(result))
+      .catch((err) => res.json({ msg: "transfer in db failed", err }));
+  }, "POST");
 }
 
 export const tripController = {
@@ -39,7 +38,6 @@ export const tripController = {
     res.json(await handleContent("trip"));
   },
   updateFootprintTable: async (req, res) => {
-    /* console.log(req) */
-    handleFootprint(req.params, req.body, res);
+    handleFootprint(req.params.id, req.body, res);
   },
 };

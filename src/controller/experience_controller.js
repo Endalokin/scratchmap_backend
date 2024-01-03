@@ -30,7 +30,7 @@ async function handleColour(imgUrl, id, res) {
       )
       .then((data) => res.sendStatus(201))
       .catch((err) => res.json({ msg: "transfer in db failed", err }));
-  });
+  }, "POST");
 }
 
 export const experienceController = {
