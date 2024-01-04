@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScratchMap API</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon_48x48.png" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #196d45;
+            color: #fff;
+            text-align: center;
+            padding: 1em;
+        }
+
+        section {
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 1em;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1em;
+            background-color: #196d45;
+            color: #fff;
+        }
+
+        li {
+            padding: 0.5em;
+        }
+
+        code {
+            display: block;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #e9e9e9;
+            margin: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>ScratchMap</h1>
+        <h2>&#x1F697; 📷 &#x026F9;</h2>
+    </header>
+
+    <section>
+        <p>This API is suited to fetch and create data for the ScratchMap that can be accessed via:</p>
+        <strong><a href="https://scratchmap-iota.vercel.app/"
+                target="_blank">https://scratchmap-iota.vercel.app/</a></strong>
+        <br />
+        <br />
+        <p>API URL:</p>
+        <code>https://scratchmap-backend.onrender.com</code>
+        <br />
+        <p>Trips:</p>
+        <ol>
+            <li>
+                <span>GET</span>
+                <code>https://scratchmap-backend.onrender.com/trips</code>
+                <p>Delivers all trips published in Contentful with enriched data from ElephantSQL.</p>
+            </li>
+            <hr />
+            <br />
+            <li>
+                <span>POST</span>
+                <code>https://scratchmap-backend.onrender.com/trips/:id</code>
+                <p>
+                    Adds information about the trip :id to the ElephantSQL table "footprint".
+                    Expects a body with following information:
+                    placeDeparture String,
+                    placeArrival String,
+                    vehicle String.
+                    They are equivalent to the parameters {dest} and {typ} of the API CarbonTracer. For specification
+                    check its documentation on <a href="https://carbontracer.uni-graz.at/api-doc#W_IV"
+                        target="_blank">https://carbontracer.uni-graz.at/api-doc#W_IV</a>.
+                </p>
+                <code>
+                    {<br />
+                    "placeDeparture": "Frankfurt-Hahn Airport",<br />
+                    "placeArrival": "Corfu Airport",<br />
+                    "vehicle": "flight-economy"<br />
+                  }
+                </code>
+            </li>
+        </ol>
+        <hr />
+        <br />
+        <p>Experiences:</p>
+        <ol>
+            <li>
+                <span>GET</span>
+                <code>https://scratchmap-backend.onrender.com/experiences</code>
+                <p>Delivers all experiences published in Contentful with enriched data from ElephantSQL.</p>
+            </li>
+            <hr />
+            <br />
+            <li>
+                <span>POST</span>
+                <code>https://scratchmap-backend.onrender.com/experiences/images/colour?id={id}&url={url}</code>
+                <p>
+                    Adds information about the experience :id to the ElephantSQL table "colours".
+                    Expects query parameter with following information:
+                    id: id of the experience that has to be updated.
+                    url: url of the image that the colour should be extracted from.
+                </p>
+            </li>
+        </ol>
+        <hr />
+        <br />
+        <a href="https://github.com/Endalokin">Github</a>
+    </section>
+    <footer>
+        <p>&copy; 2024 SCRATCHMAP API</p>
+    </footer>
+</body>
+
+</html>
