@@ -11,7 +11,7 @@ const sightengine_secret = process.env.SIGHTENGINE_SECRET;
 
 
 async function handleColour(imgUrl, id, res) {
-  const colourUrl = `https://api.sightengine.com/1.0/check.json?url=${imgUrl}&models=properties&api_user=${sightengine_user}&api_secret=${sightengine_secret}`;
+  const colourUrl = `https://api.sightengine.com/1.0/check.json?url=${imgUrl}?w=3500&models=properties&api_user=${sightengine_user}&api_secret=${sightengine_secret}`;
   let result;
   await fetchData(colourUrl, (data) => {
     result = {

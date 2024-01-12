@@ -6,10 +6,10 @@ import handleContent from "../utils/handleContent.js";
 const CARBONTRACER_KEY = process.env.CARBONTRACER_KEY;
 
 async function getFootprintFromCarbonTracer(query, res) {
+
   const carbonTracerUrl = `https://api.carbontracer.uni-graz.at/routing/${CARBONTRACER_KEY}/${query.vehicle}/${query.departure}/${query.arrival}`;
   let result;
   await fetchData(carbonTracerUrl, (data) => {
-    console.log(data)
     if (!data.response.success) {
       res.json({msg: "Query failed!", errors: data.response.errors })
       return 
@@ -32,6 +32,9 @@ async function getFootprintFromCarbonTracer(query, res) {
 }
 
 async function handleFootprint(id, body, res) {
+  if (body.placeDeparture == "Düsseldorf Airport") {
+    body.placeDeparture = "H-2298433"
+  }
   const carbonTracerUrl = `https://api.carbontracer.uni-graz.at/routing/${CARBONTRACER_KEY}/${body.vehicle}/${body.placeDeparture}/${body.placeArrival}`;
   let result;
   await fetchData(
