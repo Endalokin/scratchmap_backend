@@ -3,10 +3,19 @@ import fetchData from "../utils/fetchAPI.js";
 import { pool } from "../utils/db.js";
 
 const space_id = process.env.CONTENTFUL_SPACE_ID;
-const access_token = process.env.CONTENTFUL_ACCESS_TOKEN;
 
-async function handleContent(content_type) {
-  const url = `https://cdn.contentful.com/spaces/${space_id}/entries?access_token=${access_token}&content_type=${content_type}&include=3`;
+
+async function handleContent(content_type, user) {
+  let  subdomain
+  let access_token = process.env.CONTENTFUL_ACCESS_TOKEN;
+  if (user) {
+    subdomain = "preview"
+    access_token = process.env.CONTENTFUL_ACCESS_TOKEN_DRAFT;
+  } else {
+    subdomain = "cdn"
+    access_token = process.env.CONTENTFUL_ACCESS_TOKEN;
+  }
+  const url = `https://${subdomain}.contentful.com/spaces/${space_id}/entries?access_token=${access_token}&content_type=${content_type}&include=3`;
   let result;
   let allData;
   let pgTable;

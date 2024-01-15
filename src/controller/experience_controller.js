@@ -3,8 +3,6 @@ import fetchData from "../utils/fetchAPI.js";
 import { pool } from "../utils/db.js";
 import handleContent from "../utils/handleContent.js";
 
-const space_id = process.env.CONTENTFUL_SPACE_ID;
-const access_token = process.env.CONTENTFUL_ACCESS_TOKEN;
 const sightengine_user = process.env.SIGHTENGINE_USER;
 const sightengine_secret = process.env.SIGHTENGINE_SECRET;
 
@@ -38,6 +36,6 @@ export const experienceController = {
     handleColour(req.query.url, req.query.id, res);
   },
   getExperiences: async (req, res) => {
-    res.json(await handleContent("experience"));
+    res.json(await handleContent("experience", req.query.user));
   },
 };

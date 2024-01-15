@@ -6,34 +6,45 @@ import handleContent from "../utils/handleContent.js";
 const CARBONTRACER_KEY = process.env.CARBONTRACER_KEY;
 
 async function getFootprintFromCarbonTracer(query, res) {
-
   const carbonTracerUrl = `https://api.carbontracer.uni-graz.at/routing/${CARBONTRACER_KEY}/${query.vehicle}/${query.departure}/${query.arrival}`;
   let result;
   await fetchData(carbonTracerUrl, (data) => {
     if (!data.response.success) {
-      res.json({msg: "Query failed!", errors: data.response.errors })
-      return 
+      res.json({ msg: "Query failed!", errors: data.response.errors });
+      return;
     }
     result = {
-      distanceDirect: data.response.data.distanceDirect * (JSON.parse(query.roundtrip) ? 2 : 1),
-      distanceRoute: data.response.data.distanceRoute * (JSON.parse(query.roundtrip) ? 2 : 1),
+      distanceDirect:
+        data.response.data.distanceDirect *
+        (JSON.parse(query.roundtrip) ? 2 : 1),
+      distanceRoute:
+        data.response.data.distanceRoute *
+        (JSON.parse(query.roundtrip) ? 2 : 1),
       emission:
         query.vehicle == "car"
-          ? (data.response.data.co2eq * (JSON.parse(query.roundtrip) ? 2 : 1)) / query.travellers
+          ? (data.response.data.co2eq * (JSON.parse(query.roundtrip) ? 2 : 1)) /
+            query.travellers
           : data.response.data.co2eq * (JSON.parse(query.roundtrip) ? 2 : 1),
       amount:
         query.vehicle == "car"
-          ? ((data.response.data.co2eq * (JSON.parse(query.roundtrip) ? 2 : 1)) / query.travellers / 1000) * 30
-          : ((data.response.data.co2eq * (JSON.parse(query.roundtrip) ? 2 : 1)) / 1000) * 30,
+          ? ((data.response.data.co2eq *
+              (JSON.parse(query.roundtrip) ? 2 : 1)) /
+              query.travellers /
+              1000) *
+            30
+          : ((data.response.data.co2eq *
+              (JSON.parse(query.roundtrip) ? 2 : 1)) /
+              1000) *
+            30,
       time: data.response.data.time,
     };
   });
-  res.json(result)
+  res.json(result);
 }
 
 async function handleFootprint(id, body, res) {
   if (body.placeDeparture == "Düsseldorf Airport") {
-    body.placeDeparture = "H-2298433"
+    body.placeDeparture = "H-2298433";
   }
   const carbonTracerUrl = `https://api.carbontracer.uni-graz.at/routing/${CARBONTRACER_KEY}/${body.vehicle}/${body.placeDeparture}/${body.placeArrival}`;
   let result;
@@ -74,13 +85,25 @@ async function handleFootprint(id, body, res) {
 
 export const tripController = {
   getTrips: async (req, res) => {
-    res.json(await handleContent("trip"));
+    res.json(await handleContent("trip", req.query.user));
   },
   updateFootprintTable: async (req, res) => {
     // hier vermutlich besser erst Funktion await getFootprintFromCarbonTracer und dann Funktion zum Schreiben?
     handleFootprint(req.params.id, req.body, res);
   },
   calculateNext: async (req, res) => {
-    getFootprintFromCarbonTracer(req.query, res)
+    getFootprintFromCarbonTracer(req.query, res);
+  },
+  updateCompensation: async (req, res) => {
+    console.log(req.query.set)
+    const queryString=`UPDATE footprint set compensated = ${req.query.set} where travelid = ${req.params.id}`
+    console.log(queryString)
+    /* Not working!!! */
+    pool
+      .query("UPDATE footprint SET compensated = $1 WHERE travelid = $2", [
+        req.query.set, req.params.id,
+      ])
+      .then((data) => res.status(201).json(result))
+      .catch((err) => res.json({ msg: "transfer in db failed", err }));
   },
 };
