@@ -5,6 +5,7 @@ import bodyParser from 'body-parser'
 import experienceRouter from "./src/router/experience_router.js"
 import tripRouter from "./src/router/trip_router.js"
 import fs from 'fs';
+import { pool } from './src/utils/db.js'
 
 const app = express()
 
@@ -17,6 +18,18 @@ app.get('/',(req,res)=>res.type('html').send(html));
 
 app.get("/test", (req, res) => {
     res.json({msg: `This is a test you got from the server. Hello ${process.env.SECRET_TEST}!`})
+})
+
+app.post("/login", (req, res) => {
+    pool
+        .query(
+          "select * from private_user where name = $1 and password = $2",
+          [req.body.username, req.body.password]
+        )
+        .then((data) => {
+            res.status(202).json({userid: data.rows[0].userid})
+        })
+        .catch((err) => res.json({ msg: "transfer in db failed", err }));
 })
 
 app.use("/experiences", experienceRouter)
