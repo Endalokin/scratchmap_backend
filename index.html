@@ -88,12 +88,27 @@
                     check its documentation on <a href="https://carbontracer.uni-graz.at/api-doc#W_IV"
                         target="_blank">https://carbontracer.uni-graz.at/api-doc#W_IV</a>.
                 </p>
+                <span>Example body</span>
                 <code>
                     {<br />
                     "placeDeparture": "Frankfurt-Hahn Airport",<br />
                     "placeArrival": "Corfu Airport",<br />
                     "vehicle": "flight-economy"<br />
                   }
+                </code>
+            </li>
+            <hr />
+            <br />
+            <li>
+                <span>PUT</span>
+                <code>https://scratchmap-backend.onrender.com/trips/updateCompensation/:id?set={true || false}</code>
+                <p>
+                    Updates the state of the boolean field "compensated".
+                    Expects the id of the trip and a query parameter "set" with either true or false.
+                </p>
+                <span>Example</span>
+                <code>
+                    http://localhost:8080/trips/updateCompensation/4g2oAcEVDpNyJsX8scqak3?set=true
                 </code>
             </li>
         </ol>

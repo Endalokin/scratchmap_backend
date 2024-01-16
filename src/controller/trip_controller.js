@@ -95,13 +95,12 @@ export const tripController = {
     getFootprintFromCarbonTracer(req.query, res);
   },
   updateCompensation: async (req, res) => {
-    const queryString = `UPDATE footprint set compensated = ${req.query.set} where travelid = ${req.params.id}`;
     pool
       .query("UPDATE footprint SET compensated=$1 WHERE travelid=$2", [
         req.query.set,
         req.params.id,
       ])
-      .then((data) => res.status(201).json(data))
+      .then((data) => res.status(201).json({msg: "Complete", command: data.command, rowCount: data.rowCount }))
       .catch((err) => res.json({ msg: "transfer in db failed", err }));
   },
 };
