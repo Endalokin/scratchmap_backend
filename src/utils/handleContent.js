@@ -35,16 +35,27 @@ async function handleContent(content_type, user) {
         (a) => i.fields.image.sys.id == a.sys.id
       );
       const imgUrl = `https:${img.fields.file.url}`;
-      const imgColour = pgTable.find((c) => {
+      const imgDB = pgTable.find((c) => {
         return i.fields.image.sys.id == c.imgid;
       });
-      if (imgColour) {
+      if (imgDB) {
         return {
           id: i.sys.id,
           ...i.fields,
           imgUrl: imgUrl,
-          imgColour: imgColour.imgdominantcolour,
-          imgAccentColour: imgColour.imgaccentcolour,
+          imgColour: imgDB.imgdominantcolour,
+          imgAccentColour: imgDB.imgaccentcolour,
+          exif: {
+            dateTime: imgDB.datetime,
+            offsetTime: imgDB.offsettime,
+            lat: imgDB.lat,
+            lon: imgDB.lon,
+            altitude: imgDB.altitude,
+            direction: imgDB.direction,
+            positioningError: imgDB.positioningerror,
+            coordSystem: imgDB.coordsystem,
+            subjectArea: imgDB.subjectarea,
+          }
         };
       } else {
         return {
@@ -68,7 +79,7 @@ async function handleContent(content_type, user) {
 
 async function getColourFromDB(pgTable) {
   await pool
-    .query("select * from Colours")
+    .query("select * from Colours full join exif on Colours.imgid = exif.imgid")
     .then((data) => {
       pgTable = data.rows;
     })

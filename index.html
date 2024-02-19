@@ -125,13 +125,28 @@
             <br />
             <li>
                 <span>POST</span>
-                <code>https://scratchmap-backend.onrender.com/experiences/images/colour?id={id}&url={url}</code>
+                <code>https://scratchmap-backend.onrender.com/experiences/images/update</code>
                 <p>
-                    Adds information about the experience :id to the ElephantSQL table "colours".
-                    Expects query parameter with following information:
+                    Adds information about the experience to the ElephantSQL tables "colours" and "exif".
+                    Expects body with following information:
                     id: id of the experience that has to be updated.
-                    url: url of the image that the colour should be extracted from.
+                    url: url of the image that the colour and exif data should be extracted from.
+                    updateColour: boolean, if the colour needs to be extracted.
+                    updateExif: boolean, if the exif data needs to be extracted.
                 </p>
+                <span>Example body</span>
+                <code>
+                    {<br/>
+                        "experiencesNeedUpdate": [<br/>
+                            {<br/>
+                                "id": "gewcawecrwe",<br/>
+                                "url": "https://images.ctfassets.net/q0wjbbqqoctx/21trwSvi3IE9aW5ezIfXtw/4955661ebe310cde287ff6ff00468dfa/IMG_3025.JPG",<br/>
+                                "updateColour": true,<br/>
+                                "updateExif": true<br/>
+                            }<br/>
+                        ]<br/>
+                    }<br/>
+                </code>
             </li>
         </ol>
         <hr />
