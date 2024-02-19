@@ -1,6 +1,6 @@
 {
   "name": "scratchmap_backend",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "type": "module",
@@ -16,6 +16,7 @@
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
+    "exifreader": "^4.21.0",
     "express": "^4.18.2",
     "pg": "^8.11.3"
   },
