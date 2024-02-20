@@ -79,15 +79,18 @@
                 <span>POST</span>
                 <code>https://scratchmap-backend.onrender.com/trips/:id</code>
                 <p>
-                    Adds information about the trip :id to the ElephantSQL table "footprint".
-                    Expects a body with following information:
-                    placeDeparture String,
-                    placeArrival String,
-                    vehicle String.
-                    They are equivalent to the parameters {dest} and {typ} of the API CarbonTracer. For specification
+                    Adds information about the trip :id to the ElephantSQL table "footprint".</p>
+                <div>Expects a body with following information:
+                    <ul>
+                        <li>placeDeparture String,</li>
+                        <li>placeArrival String,</li>
+                        <li>vehicle String.</li>
+                    </ul>
+                </div>
+                <p>They are equivalent to the parameters {dest} and {typ} of the API CarbonTracer. For specification
                     check its documentation on <a href="https://carbontracer.uni-graz.at/api-doc#W_IV"
-                        target="_blank">https://carbontracer.uni-graz.at/api-doc#W_IV</a>.
-                </p>
+                        target="_blank">https://carbontracer.uni-graz.at/api-doc#W_IV</a>.</p>
+
                 <span>Example body</span>
                 <code>
                     {<br />
@@ -127,25 +130,29 @@
                 <span>POST</span>
                 <code>https://scratchmap-backend.onrender.com/experiences/images/update</code>
                 <p>
-                    Adds information about the experience to the ElephantSQL tables "colours" and "exif".
-                    Expects body with following information:
-                    id: id of the experience that has to be updated.
-                    url: url of the image that the colour and exif data should be extracted from.
-                    updateColour: boolean, if the colour needs to be extracted.
-                    updateExif: boolean, if the exif data needs to be extracted.
-                </p>
+                    Adds information about the experience to the ElephantSQL tables "colours" and "exif".</p>
+                <div>Expects body with following information:
+                    <ul>
+                        <li>id: id of the experience that has to be updated.</li>
+                        <li>url: url of the image that the colour and exif data should be extracted from.</li>
+                        <li>updateColour: boolean, if the colour needs to be extracted.</li>
+                        <li>updateExif: boolean, if the exif data needs to be extracted.</li>
+                    </ul>
+                </div>
                 <span>Example body</span>
                 <code>
-                    {<br/>
-                        "experiencesNeedUpdate": [<br/>
-                            {<br/>
-                                "id": "gewcawecrwe",<br/>
-                                "url": "https://images.ctfassets.net/q0wjbbqqoctx/21trwSvi3IE9aW5ezIfXtw/4955661ebe310cde287ff6ff00468dfa/IMG_3025.JPG",<br/>
-                                "updateColour": true,<br/>
-                                "updateExif": true<br/>
-                            }<br/>
-                        ]<br/>
-                    }<br/>
+                    <pre>
+{<br/>
+    "experiencesNeedUpdate": [<br/>
+        {<br/>
+            "id": "gewcawecrwe",<br/>
+            "url": "https://images.ctfassets.net/q0wjbbqqoctx/21trwSvi3IE9aW5ezIfXtw/4955661ebe310cde287ff6ff00468dfa/IMG_3025.JPG",<br/>
+            "updateColour": true,<br/>
+            "updateExif": true<br/>
+        }<br/>
+    ]<br/>
+}
+                    </pre>
                 </code>
             </li>
         </ol>

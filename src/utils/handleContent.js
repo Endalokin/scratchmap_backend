@@ -4,7 +4,6 @@ import { pool } from "../utils/db.js";
 
 const space_id = process.env.CONTENTFUL_SPACE_ID;
 
-
 async function handleContent(content_type, user) {
   let  subdomain
   let access_token = process.env.CONTENTFUL_ACCESS_TOKEN;
@@ -77,7 +76,7 @@ async function handleContent(content_type, user) {
   }));
 }
 
-async function getColourFromDB(pgTable) {
+ async function getColourFromDB(pgTable) {
   await pool
     .query("select * from Colours full join exif on Colours.imgid = exif.imgid")
     .then((data) => {
@@ -95,6 +94,6 @@ async function getFootprintFromDB(pgTable) {
     })
     .catch((err) => console.log({ msg: "select from db failed", err }));
   return pgTable;
-}
+} 
 
 export default handleContent;
