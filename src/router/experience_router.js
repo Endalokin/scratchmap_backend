@@ -4,7 +4,6 @@ import { experienceController } from '../controller/experience_controller.js'
 const router = express.Router()
 
 router.get('/', experienceController.getExperiences)
-
-router.post('/images/colour', experienceController.postColour)
+router.post('/images/update', experienceController.updateImgData)
 
 export default router;
