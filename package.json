@@ -1,12 +1,12 @@
 {
   "name": "scratchmap_backend",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "dev": "nodemon index.js"
   },
   "keywords": [],
@@ -21,6 +21,7 @@
     "pg": "^8.11.3"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^3.0.2"
   }
 }
