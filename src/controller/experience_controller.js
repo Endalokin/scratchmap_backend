@@ -60,7 +60,6 @@ export function formatExifAltitude(result) {
 }
 
 export function formatExifLocation(result) {
-  console.log(result)
   let location = { lon: 0, lat: 0 };
   if (result.GPSLongitudeRef?.value[0] == "W") {
     location.lon -= result.GPSLongitude?.description;
