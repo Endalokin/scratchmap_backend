@@ -46,12 +46,52 @@ async function handleFootprint(id, body, res) {
   );
 }
 
+async function getFootprintFromCarbonTracer(query, res) {
+  const carbonTracerUrl = `https://api.carbontracer.uni-graz.at/routing/${CARBONTRACER_KEY}/${query.vehicle}/${query.departure}/${query.arrival}`;
+  let result;
+  await fetchData(carbonTracerUrl, (data) => {
+    if (!data.response.success) {
+      res.json({ msg: "Query failed!", errors: data.response.errors });
+      return;
+    }
+    result = {
+      distanceDirect:
+        data.response.data.distanceDirect *
+        (JSON.parse(query.roundtrip) ? 2 : 1),
+      distanceRoute:
+        data.response.data.distanceRoute *
+        (JSON.parse(query.roundtrip) ? 2 : 1),
+      emission:
+        query.vehicle == "car"
+          ? (data.response.data.co2eq * (JSON.parse(query.roundtrip) ? 2 : 1)) /
+            query.travellers
+          : data.response.data.co2eq * (JSON.parse(query.roundtrip) ? 2 : 1),
+      amount:
+        query.vehicle == "car"
+          ? ((data.response.data.co2eq *
+              (JSON.parse(query.roundtrip) ? 2 : 1)) /
+              query.travellers /
+              1000) *
+            30
+          : ((data.response.data.co2eq *
+              (JSON.parse(query.roundtrip) ? 2 : 1)) /
+              1000) *
+            30,
+      time: data.response.data.time,
+    };
+  });
+  res.json(result);
+}
+
 export const tripController = {
   getTrips: async (req, res) => {
     res.json(await handleContent("trip", req.headers["x-access-token"]));
   },
   updateFootprintTable: async (req, res) => {
     handleFootprint(req.params.id, req.body, res);
+  },
+  calculateNext: async (req, res) => {
+    getFootprintFromCarbonTracer(req.query, res);
   },
   updateCompensation: async (req, res) => {
     pool
