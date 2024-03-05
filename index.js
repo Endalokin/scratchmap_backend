@@ -4,6 +4,7 @@ import cors from 'cors'
 import bodyParser from 'body-parser'
 import experienceRouter from "./src/router/experience_router.js"
 import tripRouter from "./src/router/trip_router.js"
+import authRouter from "./src/router/auth_router.js"
 import fs from 'fs';
 import { pool } from './src/utils/db.js'
 
@@ -20,6 +21,7 @@ app.get("/test", (req, res) => {
     res.json({msg: `This is a test you got from the server. Hello ${process.env.SECRET_TEST}!`})
 })
 
+// This will be deprecated as soon as user route is done
 app.post("/login", (req, res) => {
     pool
         .query(
@@ -32,6 +34,7 @@ app.post("/login", (req, res) => {
         .catch((err) => res.json({ msg: "transfer in db failed", err }));
 })
 
+app.use("/user", authRouter)
 app.use("/experiences", experienceRouter)
 app.use("/trips", tripRouter)
 
