@@ -21,19 +21,6 @@ app.get("/test", (req, res) => {
     res.json({msg: `This is a test you got from the server. Hello ${process.env.SECRET_TEST}!`})
 })
 
-// This will be deprecated as soon as user route is done
-app.post("/login", (req, res) => {
-    pool
-        .query(
-          "select * from private_user where name = $1 and password = $2",
-          [req.body.username, req.body.password]
-        )
-        .then((data) => {
-            res.status(202).json({userid: data.rows[0].userid})
-        })
-        .catch((err) => res.json({ msg: "transfer in db failed", err }));
-})
-
 app.use("/user", authRouter)
 app.use("/experiences", experienceRouter)
 app.use("/trips", tripRouter)
