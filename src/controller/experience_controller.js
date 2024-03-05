@@ -121,6 +121,6 @@ export const experienceController = {
       .json({ exifMessages: exifMessages, colourMessages: colourMessages });
   },
   getExperiences: async (req, res) => {
-    res.json(await handleContent("experience", req.query.user));
+    res.json(await handleContent("experience", req.headers["x-access-token"]));
   },
 };

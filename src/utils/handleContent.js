@@ -1,17 +1,27 @@
 import "dotenv/config";
 import fetchData from "../utils/fetchAPI.js";
 import { pool } from "../utils/db.js";
+import jwt from "jsonwebtoken";
 
 const space_id = process.env.CONTENTFUL_SPACE_ID;
+const SECRET_AUTH = process.env.SECRET_AUTH;
 
-async function handleContent(content_type, user) {
-  let  subdomain
+async function handleContent(content_type, token) {
+  let subdomain;
   let access_token = process.env.CONTENTFUL_ACCESS_TOKEN;
-  if (user) {
-    subdomain = "preview"
-    access_token = process.env.CONTENTFUL_ACCESS_TOKEN_DRAFT;
+
+  if (token) {
+    jwt.verify(token, SECRET_AUTH, (err, decoded) => {
+      if (err) {
+        subdomain = "cdn";
+        access_token = process.env.CONTENTFUL_ACCESS_TOKEN;
+      } else {
+        subdomain = "preview";
+        access_token = process.env.CONTENTFUL_ACCESS_TOKEN_DRAFT;
+      }
+    });
   } else {
-    subdomain = "cdn"
+    subdomain = "cdn";
     access_token = process.env.CONTENTFUL_ACCESS_TOKEN;
   }
   const url = `https://${subdomain}.contentful.com/spaces/${space_id}/entries?access_token=${access_token}&content_type=${content_type}&include=3`;
@@ -54,7 +64,7 @@ async function handleContent(content_type, user) {
             positioningError: imgDB.positioningerror,
             coordSystem: imgDB.coordsystem,
             subjectArea: imgDB.subjectarea,
-          }
+          },
         };
       } else {
         return {
@@ -76,7 +86,7 @@ async function handleContent(content_type, user) {
   }));
 }
 
- async function getColourFromDB(pgTable) {
+async function getColourFromDB(pgTable) {
   await pool
     .query("select * from Colours full join exif on Colours.imgid = exif.imgid")
     .then((data) => {
@@ -94,6 +104,6 @@ async function getFootprintFromDB(pgTable) {
     })
     .catch((err) => console.log({ msg: "select from db failed", err }));
   return pgTable;
-} 
+}
 
 export default handleContent;

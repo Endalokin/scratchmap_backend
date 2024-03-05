@@ -48,7 +48,7 @@ async function handleFootprint(id, body, res) {
 
 export const tripController = {
   getTrips: async (req, res) => {
-    res.json(await handleContent("trip", req.query.user));
+    res.json(await handleContent("trip", req.headers["x-access-token"]));
   },
   updateFootprintTable: async (req, res) => {
     handleFootprint(req.params.id, req.body, res);
