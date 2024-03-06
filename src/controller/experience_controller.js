@@ -7,7 +7,7 @@ import ExifReader from "exifreader";
 const sightengine_user = process.env.SIGHTENGINE_USER;
 const sightengine_secret = process.env.SIGHTENGINE_SECRET;
 
-async function handleColour(imgUrl, id, res) {
+async function handleColour(imgUrl, id) {
   console.log("This is Colours");
   const colourUrl = `https://api.sightengine.com/1.0/check.json?url=${imgUrl}?w=3500&models=properties&api_user=${sightengine_user}&api_secret=${sightengine_secret}`;
   let result = {};
@@ -35,9 +35,7 @@ async function handleColour(imgUrl, id, res) {
     .catch((err) => `Exif transfer in db failed: ${err}`);
 }
 
-async function handleExif(imgUrl, id, res) {
-  console.log("This is Exif");
-  const result = await ExifReader.load(imgUrl);
+function formatExifDate(result) {
   let timestamp;
   if (result.DateTimeOriginal?.description[4] == ":") {
     timestamp =
@@ -47,7 +45,10 @@ async function handleExif(imgUrl, id, res) {
   } else {
     timestamp = result.DateTimeOriginal?.description;
   }
+  return timestamp;
+}
 
+export function formatExifAltitude(result) {
   let altitude;
   if (result.GPSAltitude?.description.includes("/")) {
     let number = result.GPSAltitude?.description.split(" ")[0].split("/");
@@ -55,19 +56,32 @@ async function handleExif(imgUrl, id, res) {
   } else {
     altitude = result.GPSAltitude?.description.split(" ")[0];
   }
-  let lon = 0;
+  return parseFloat(altitude);
+}
+
+export function formatExifLocation(result) {
+  let location = { lon: 0, lat: 0 };
   if (result.GPSLongitudeRef?.value[0] == "W") {
-    lon -= result.GPSLongitude?.description;
+    location.lon -= result.GPSLongitude?.description;
   } else {
-    lon += result.GPSLongitude?.description;
+    location.lon += result.GPSLongitude?.description;
   }
 
-  let lat = 0;
   if (result.GPSLatitudeRef?.value[0] == "S") {
-    lat -= result.GPSLatitude?.description;
+    location.lat -= result.GPSLatitude?.description;
   } else {
-    lat += result.GPSLatitude?.description;
+    location.lat += result.GPSLatitude?.description;
   }
+  return location;
+}
+
+async function handleExif(imgUrl, id) {
+  console.log("This is Exif");
+  const result = await ExifReader.load(imgUrl);
+
+  let timestamp = formatExifDate(result);
+  let altitude = formatExifAltitude(result);
+  let location = formatExifLocation(result);
 
   return await pool
     .query(
@@ -76,8 +90,8 @@ async function handleExif(imgUrl, id, res) {
         id,
         timestamp,
         result.OffsetTimeOriginal?.description,
-        lat,
-        lon,
+        location.lat,
+        location.lon,
         altitude,
         result.GPSImgDirection?.description,
         result.GPSHPositioningError?.description,
@@ -96,15 +110,17 @@ export const experienceController = {
     let exifMessages = {};
     for (let image of req.body.experiencesNeedUpdate) {
       if (image.updateColour) {
-        colourMessages[image.id] = await handleColour(image.url, image.id, res);  
+        colourMessages[image.id] = await handleColour(image.url, image.id);
       }
       if (image.updateExif) {
-        exifMessages[image.id] = await handleExif(image.url, image.id, res);
+        exifMessages[image.id] = await handleExif(image.url, image.id);
       }
     }
-    res.status(201).json({exifMessages: exifMessages, colourMessages: colourMessages});
+    res
+      .status(201)
+      .json({ exifMessages: exifMessages, colourMessages: colourMessages });
   },
   getExperiences: async (req, res) => {
-    res.json(await handleContent("experience", req.query.user));
+    res.json(await handleContent("experience", req.headers["x-access-token"]));
   },
 };
