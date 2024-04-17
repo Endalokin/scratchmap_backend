@@ -27,15 +27,18 @@ async function handleContent(content_type, token) {
   const url = `https://${subdomain}.contentful.com/spaces/${space_id}/entries?access_token=${access_token}&content_type=${content_type}&include=3`;
   let result;
   let allData;
-  let pgTable;
+  let pgColourTable;
+  let pgFootprintTable;
+  let pgTrackTable;
   await fetchData(url, (data) => {
     allData = data;
   });
 
   if (content_type == "experience") {
-    pgTable = await getColourFromDB(pgTable);
+    pgColourTable = await getColourFromDB();
   } else {
-    pgTable = await getFootprintFromDB(pgTable);
+    pgFootprintTable = await getFootprintFromDB();
+    pgTrackTable = await getTracksFromDB();
   }
 
   return (result = await allData.items.map((i) => {
@@ -44,7 +47,7 @@ async function handleContent(content_type, token) {
         (a) => i.fields.image.sys.id == a.sys.id
       );
       const imgUrl = `https:${img.fields.file.url}`;
-      const imgDB = pgTable.find((c) => {
+      const imgDB = pgColourTable.find((c) => {
         return i.fields.image.sys.id == c.imgid;
       });
       if (imgDB) {
@@ -74,36 +77,60 @@ async function handleContent(content_type, token) {
         };
       }
     } else {
-      const footprint = pgTable.find((c) => {
+      const footprint = pgFootprintTable.find((c) => {
         return i.sys.id == c.travelid;
       });
+      let tracks = pgTrackTable.filter((c) => {
+        return i.sys.id == c.travelid;
+      })
+
+      tracks = tracks.map((t) => {
+        let pathArray = t.path.replaceAll("(", "[")
+        pathArray = pathArray?.replaceAll(")", "]")
+        return {
+          id: t.trackid,
+          name: t.name,
+          path: JSON.parse(pathArray),
+          altitude: t.altitude
+        }
+      })
+
       return {
         id: i.sys.id,
         ...i.fields,
         footprint: footprint,
+        tracks: tracks
       };
     }
   }));
 }
 
-async function getColourFromDB(pgTable) {
-  await pool
+async function getColourFromDB() {
+  return await pool
     .query("select * from Colours full join exif on Colours.imgid = exif.imgid")
     .then((data) => {
-      pgTable = data.rows;
+      return data.rows;
     })
     .catch((err) => console.log({ msg: "select from db failed", err }));
-  return pgTable;
 }
 
-async function getFootprintFromDB(pgTable) {
-  await pool
+async function getFootprintFromDB() {
+  return await pool
     .query("select * from Footprint")
     .then((data) => {
-      pgTable = data.rows;
+      return data.rows;
     })
     .catch((err) => console.log({ msg: "select from db failed", err }));
-  return pgTable;
+}
+
+async function getTracksFromDB() {
+  return await pool
+    .query("select * from Tracks")
+    .then((data) => {
+      console.log(data)
+      return data.rows;
+    })
+    .catch((err) => console.log({ msg: "select from db failed", err }));
 }
 
 export default handleContent;
