@@ -99,7 +99,52 @@ export const tripController = {
         req.query.set,
         req.params.id,
       ])
-      .then((data) => res.status(201).json({msg: "Complete", command: data.command, rowCount: data.rowCount }))
+      .then((data) =>
+        res
+          .status(201)
+          .json({
+            msg: "Complete",
+            command: data.command,
+            rowCount: data.rowCount,
+          })
+      )
+      .catch((err) => res.json({ msg: "transfer in db failed", err }));
+  },
+  addTrack: async (req, res) => {
+    console.log("this is accessed")
+/*     console.log(req.params.id)
+    console.log(req.body.path) */
+    let path = req.body.path.map(position => {
+      return [position[0], position[1]]
+    })
+
+    let altitude = null
+    if (req.body.path.length > 2) {
+      altitude = req.body.path.map(position => {
+        return position[2]
+      })
+    }
+    console.log("The altitude: ", altitude)
+    path = JSON.stringify(path)
+    path = path.replaceAll("[", "(")
+    path = path.replaceAll("]", ")")
+    path = path.replace("((", "(")
+    path = path.replace("))", ")")
+
+    pool
+      .query(
+        "INSERT INTO Tracks (travelid, name, path, altitude) VALUES ($1, $2, path($3), $4)",
+        [req.params.id, req.body.name, path, altitude]
+      )
+      .then((data) =>
+        res
+          .status(201)
+          .json({
+            msg: "Complete",
+            command: data.command,
+            rowCount: data.rowCount,
+          })
+      )
       .catch((err) => res.json({ msg: "transfer in db failed", err }));
   },
 };
