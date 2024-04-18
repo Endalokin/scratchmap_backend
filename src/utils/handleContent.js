@@ -127,7 +127,6 @@ async function getTracksFromDB() {
   return await pool
     .query("select * from Tracks")
     .then((data) => {
-      console.log(data)
       return data.rows;
     })
     .catch((err) => console.log({ msg: "select from db failed", err }));
