@@ -111,9 +111,7 @@ export const tripController = {
       .catch((err) => res.json({ msg: "transfer in db failed", err }));
   },
   addTrack: async (req, res) => {
-    console.log("this is accessed")
-/*     console.log(req.params.id)
-    console.log(req.body.path) */
+
     let path = req.body.path.map(position => {
       return [position[0], position[1]]
     })
@@ -124,7 +122,7 @@ export const tripController = {
         return position[2]
       })
     }
-    console.log("The altitude: ", altitude)
+
     path = JSON.stringify(path)
     path = path.replaceAll("[", "(")
     path = path.replaceAll("]", ")")
@@ -147,4 +145,21 @@ export const tripController = {
       )
       .catch((err) => res.json({ msg: "transfer in db failed", err }));
   },
+  deleteTrack: async (req, res) => {
+    pool
+    .query(
+      "DELETE FROM Tracks WHERE trackid = $1",
+      [req.params.trackid]
+    )
+    .then((data) =>
+      res
+        .status(200)
+        .json({
+          msg: "Complete",
+          command: data.command,
+          rowCount: data.rowCount,
+        })
+    )
+    .catch((err) => res.json({ msg: "transfer in db failed", err }));
+  }
 };
