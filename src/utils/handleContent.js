@@ -90,7 +90,8 @@ async function handleContent(content_type, token) {
         return {
           id: t.trackid,
           name: t.name,
-          path: JSON.parse(pathArray)
+          path: JSON.parse(pathArray),
+          altitude: t.altitude
         }
       })
 
