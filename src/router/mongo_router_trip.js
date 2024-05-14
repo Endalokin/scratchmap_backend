@@ -8,6 +8,7 @@ router.get("/tracks", async (req, res) => {
   res.json(await getTracks())
 }); */
 router.get('/', tripController.getTrips)
-/* router.post('/:id', tripController.updateFootprintTable) */
+router.post('/:id', tripController.updateFootprintTable)
+router.put('/updateCompensation/:id', tripController.updateCompensation)
 
 export default router;

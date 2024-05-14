@@ -2,10 +2,13 @@ import "dotenv/config";
 import fetchData from "../utils/fetchAPI.js";
 import { pool } from "../utils/db.js";
 import handleContent from "../utils/mongoHandleContent.js";
+import createFootprintDocument from "../connections/trips/createFootprintDocument.js";
+import updateFootprintDocumentCompensation from "../connections/trips/updateFootprintDocumentCompensation.js";
 
 const CARBONTRACER_KEY = process.env.CARBONTRACER_KEY;
 
 async function handleFootprint(id, body, res) {
+    console.log("accessed handleFootprint")
   if (body.placeDeparture == "Düsseldorf Airport") {
     body.placeDeparture = "H-2298433";
   }
@@ -27,20 +30,8 @@ async function handleFootprint(id, body, res) {
             : ((data.response.data.co2eq * 2) / 1000) * 30,
         time: data.response.data.time,
       };
-      pool
-        .query(
-          "insert into footprint (travelid, distance, emission, amount, compensated, time) values ($1, $2, $3, $4, $5, $6)",
-          [
-            id,
-            result.distanceRoute,
-            result.emission,
-            result.amount,
-            false,
-            result.time,
-          ]
-        )
-        .then((data) => res.status(201).json(result))
-        .catch((err) => res.json({ msg: "transfer in db failed", err }));
+      
+      res.status(201).json(createFootprintDocument(id, result))
     },
     "POST"
   );
@@ -86,10 +77,14 @@ async function getFootprintFromCarbonTracer(query, res) {
 export const tripController = {
   getTrips: async (req, res) => {
     res.json(await handleContent("trip", req.headers["x-access-token"]));
-  } /* ,
+  } ,
   updateFootprintTable: async (req, res) => {
     handleFootprint(req.params.id, req.body, res);
-  }, */
+  },
+  updateCompensation: async (req, res) => {
+    updateFootprintDocumentCompensation(req.params.id, req.query.set, res)
+
+  },
   /*
   calculateNext: async (req, res) => {
     getFootprintFromCarbonTracer(req.query, res);
