@@ -99,7 +99,67 @@ export const tripController = {
         req.query.set,
         req.params.id,
       ])
-      .then((data) => res.status(201).json({msg: "Complete", command: data.command, rowCount: data.rowCount }))
+      .then((data) =>
+        res
+          .status(201)
+          .json({
+            msg: "Complete",
+            command: data.command,
+            rowCount: data.rowCount,
+          })
+      )
       .catch((err) => res.json({ msg: "transfer in db failed", err }));
   },
+  addTrack: async (req, res) => {
+
+    let path = req.body.path.map(position => {
+      return [position[0], position[1]]
+    })
+
+    let altitude = null
+    if (req.body.path.length > 2) {
+      altitude = req.body.path.map(position => {
+        return position[2]
+      })
+    }
+
+    path = JSON.stringify(path)
+    path = path.replaceAll("[", "(")
+    path = path.replaceAll("]", ")")
+    path = path.replace("((", "(")
+    path = path.replace("))", ")")
+
+    pool
+      .query(
+        "INSERT INTO Tracks (travelid, name, path, altitude) VALUES ($1, $2, path($3), $4)",
+        [req.params.id, req.body.name, path, altitude]
+      )
+      .then((data) =>
+        res
+          .status(201)
+          .json({
+            msg: "Complete",
+            command: data.command,
+            rowCount: data.rowCount,
+          })
+      )
+      .catch((err) => res.json({ msg: "transfer in db failed", err }));
+  },
+  deleteTrack: async (req, res) => {
+    pool
+    .query(
+      "DELETE FROM Tracks WHERE trackid = $1",
+      [req.params.trackid]
+    )
+    .then((data) =>
+      res
+        .status(200)
+        .json({
+          msg: "Complete",
+          command: data.command,
+          rowCount: data.rowCount,
+        })
+    )
+    .catch((err) => res.json({ msg: "transfer in db failed", err }));
+  }
 };
