@@ -10,5 +10,7 @@ router.get("/tracks", async (req, res) => {
 router.get('/', tripController.getTrips)
 router.post('/:id', tripController.updateFootprintTable)
 router.put('/updateCompensation/:id', tripController.updateCompensation)
+router.post('/addTrack/:id', tripController.addTrack)
+router.delete('/deleteTrack/:trackid', tripController.deleteTrack)
 
 export default router;
