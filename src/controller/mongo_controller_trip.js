@@ -4,6 +4,8 @@ import { pool } from "../utils/db.js";
 import handleContent from "../utils/mongoHandleContent.js";
 import createFootprintDocument from "../connections/trips/createFootprintDocument.js";
 import updateFootprintDocumentCompensation from "../connections/trips/updateFootprintDocumentCompensation.js";
+import createTrackDocument from "../connections/trips/createTrackDocument.js";
+import deleteTrackDocument from "../connections/trips/deleteTrackDocument.js";
 
 const CARBONTRACER_KEY = process.env.CARBONTRACER_KEY;
 
@@ -85,6 +87,22 @@ export const tripController = {
     updateFootprintDocumentCompensation(req.params.id, req.query.set, res)
 
   },
+  addTrack: async (req, res) => {
+    await createTrackDocument(req.params.id, req.body)
+    res
+    .status(201)
+    .json({
+      msg: "Complete"
+    })
+  },
+  deleteTrack: async (req, res) => {
+    await deleteTrackDocument(req.params.trackid)
+    res
+    .status(200)
+    .json({
+      msg: "Complete"
+    })
+  }
   /*
   calculateNext: async (req, res) => {
     getFootprintFromCarbonTracer(req.query, res);
