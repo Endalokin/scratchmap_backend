@@ -1,9 +1,10 @@
 import "dotenv/config";
 import fetchData from "./fetchAPI.js";
-import { pool } from "./db.js";
 import jwt from "jsonwebtoken";
-import getFootprintFromDB from "../connections/trips/getFootprintFromDb.js";
-import getTracksFromDB from "../connections/trips/getTracksFromDb.js";
+import getFootprintFromDB from "../connections/mongoDB/trips/getFootprintFromDb.js";
+import getTracksFromDB from "../connections/mongoDB/trips/getTracksFromDb.js";
+import getColours from "../connections/mongoDB/experiences/getColoursFromDb.js";
+import getExifs from "../connections/mongoDB/experiences/getExifsFromDb.js";
 
 const space_id = process.env.CONTENTFUL_SPACE_ID;
 const SECRET_AUTH = process.env.SECRET_AUTH;
@@ -27,9 +28,9 @@ async function handleContent(content_type, token) {
     access_token = process.env.CONTENTFUL_ACCESS_TOKEN;
   }
   const url = `https://${subdomain}.contentful.com/spaces/${space_id}/entries?access_token=${access_token}&content_type=${content_type}&include=3`;
-  let result;
   let allData;
   let pgColourTable;
+  let pgExifTable;
   let pgFootprintTable;
   let pgTrackTable;
   await fetchData(url, (data) => {
@@ -37,72 +38,64 @@ async function handleContent(content_type, token) {
   });
 
   if (content_type == "experience") {
-    pgColourTable = await getColourFromDB();
+    pgColourTable = await getColours();
+    pgExifTable = await getExifs();
   } else {
     pgFootprintTable = await getFootprintFromDB();
     pgTrackTable = await getTracksFromDB();
   }
 
-  return (result = await allData.items.map((i) => {
+  return await allData.items.map((item) => {
     if (content_type == "experience") {
       const img = allData.includes.Asset.find(
-        (a) => i.fields.image.sys.id == a.sys.id
+        (asset) => item.fields.image.sys.id == asset.sys.id
       );
       const imgUrl = `https:${img.fields.file.url}`;
-      const imgDB = pgColourTable.find((c) => {
-        return i.fields.image.sys.id == c.imgid;
+      const imgDB = pgColourTable.find((colourDocument) => {
+        return item.fields.image.sys.id == colourDocument.imgid;
       });
+      const exifDB = pgExifTable.find((exifDocument) => {
+        return item.fields.image.sys.id == exifDocument.imgid;
+      });
+      let experienceObject = {
+        id: item.sys.id,
+        ...item.fields,
+        imgUrl: imgUrl,
+      };
       if (imgDB) {
-        return {
-          id: i.sys.id,
-          ...i.fields,
-          imgUrl: imgUrl,
-          imgColour: imgDB.imgdominantcolour,
-          imgAccentColour: imgDB.imgaccentcolour,
-          exif: {
-            dateTime: imgDB.datetime,
-            offsetTime: imgDB.offsettime,
-            lat: imgDB.lat,
-            lon: imgDB.lon,
-            altitude: imgDB.altitude,
-            direction: imgDB.direction,
-            positioningError: imgDB.positioningerror,
-            coordSystem: imgDB.coordsystem,
-            subjectArea: imgDB.subjectarea,
-          },
-        };
-      } else {
-        return {
-          id: i.sys.id,
-          ...i.fields,
-          imgUrl: imgUrl,
+        (experienceObject.imgColour = imgDB.imgdominantcolour),
+          (experienceObject.imgAccentColour = imgDB.imgaccentcolour);
+      }
+      if (exifDB) {
+        experienceObject.exif = {
+          dateTime: exifDB?.datetime,
+          offsetTime: exifDB?.offsettime,
+          lat: exifDB?.lat,
+          lon: exifDB?.lon,
+          altitude: exifDB?.altitude,
+          direction: exifDB?.direction,
+          positioningError: exifDB?.positioningerror,
+          coordSystem: exifDB?.coordsystem,
+          subjectArea: exifDB?.subjectarea,
         };
       }
+      return experienceObject;
     } else {
-      const footprint = pgFootprintTable.find((c) => {
-        return i.sys.id == c.travelid;
+      const footprint = pgFootprintTable.find((footprintDocument) => {
+        return item.sys.id == footprintDocument.travelid;
       });
-      let tracks = pgTrackTable.filter((c) => {
-        return i.sys.id == c.travelid;
-      })
+      let tracks = pgTrackTable.filter((trackDocument) => {
+        return item.sys.id == trackDocument.travelid;
+      });
 
       return {
-        id: i.sys.id,
-        ...i.fields,
+        id: item.sys.id,
+        ...item.fields,
         footprint: footprint,
-        tracks: tracks
+        tracks: tracks,
       };
     }
-  }));
-}
-
-async function getColourFromDB() {
-  return await pool
-    .query("select * from Colours full join exif on Colours.imgid = exif.imgid")
-    .then((data) => {
-      return data.rows;
-    })
-    .catch((err) => console.log({ msg: "select from db failed", err }));
+  });
 }
 
 export default handleContent;

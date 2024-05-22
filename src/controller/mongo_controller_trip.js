@@ -1,16 +1,14 @@
 import "dotenv/config";
 import fetchData from "../utils/fetchAPI.js";
-import { pool } from "../utils/db.js";
 import handleContent from "../utils/mongoHandleContent.js";
-import createFootprintDocument from "../connections/trips/createFootprintDocument.js";
-import updateFootprintDocumentCompensation from "../connections/trips/updateFootprintDocumentCompensation.js";
-import createTrackDocument from "../connections/trips/createTrackDocument.js";
-import deleteTrackDocument from "../connections/trips/deleteTrackDocument.js";
+import createFootprintDocument from "../connections/mongoDB/trips/createFootprintDocument.js";
+import updateFootprintDocumentCompensation from "../connections/mongoDB/trips/updateFootprintDocumentCompensation.js";
+import createTrackDocument from "../connections/mongoDB/trips/createTrackDocument.js";
+import deleteTrackDocument from "../connections/mongoDB/trips/deleteTrackDocument.js";
 
 const CARBONTRACER_KEY = process.env.CARBONTRACER_KEY;
 
 async function handleFootprint(id, body, res) {
-    console.log("accessed handleFootprint")
   if (body.placeDeparture == "Düsseldorf Airport") {
     body.placeDeparture = "H-2298433";
   }
@@ -32,8 +30,8 @@ async function handleFootprint(id, body, res) {
             : ((data.response.data.co2eq * 2) / 1000) * 30,
         time: data.response.data.time,
       };
-      
-      res.status(201).json(createFootprintDocument(id, result))
+
+      res.status(201).json(createFootprintDocument(id, result));
     },
     "POST"
   );
@@ -79,32 +77,27 @@ async function getFootprintFromCarbonTracer(query, res) {
 export const tripController = {
   getTrips: async (req, res) => {
     res.json(await handleContent("trip", req.headers["x-access-token"]));
-  } ,
+  },
   updateFootprintTable: async (req, res) => {
     handleFootprint(req.params.id, req.body, res);
   },
   updateCompensation: async (req, res) => {
-    updateFootprintDocumentCompensation(req.params.id, req.query.set, res)
-
+    updateFootprintDocumentCompensation(req.params.id, req.query.set, res);
   },
   addTrack: async (req, res) => {
-    await createTrackDocument(req.params.id, req.body)
-    res
-    .status(201)
-    .json({
-      msg: "Complete"
-    })
+    await createTrackDocument(req.params.id, req.body);
+    res.status(201).json({
+      msg: "Complete",
+    });
   },
   deleteTrack: async (req, res) => {
-    await deleteTrackDocument(req.params.trackid)
-    res
-    .status(200)
-    .json({
-      msg: "Complete"
-    })
-  }
-  /*
+    await deleteTrackDocument(req.params.trackid);
+    res.status(200).json({
+      msg: "Complete",
+    });
+  },
+
   calculateNext: async (req, res) => {
     getFootprintFromCarbonTracer(req.query, res);
-  } */
+  },
 };

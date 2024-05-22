@@ -1,4 +1,4 @@
-import trackSchema from "../../schemas/trackSchema.js";
+import trackSchema from "../../../schemas/trackSchema.js";
 import connTrips from "./dbTrips.js";
 
 async function deleteTrackDocument(trackid) {
