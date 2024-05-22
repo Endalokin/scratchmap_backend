@@ -1,4 +1,4 @@
-import footprintSchema from "../../schemas/footprintSchema.js";
+import footprintSchema from "../../../schemas/footprintSchema.js";
 import connTrips from "./dbTrips.js";
 
 async function getFootprint() {
