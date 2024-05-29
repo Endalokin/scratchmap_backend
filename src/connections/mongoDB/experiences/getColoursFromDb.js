@@ -6,7 +6,7 @@ async function getColours() {
   try {
     const colours = await Colours.find();
     return colours
-  } catch {
+  } catch (err) {
     console.log(err.message);
   }
 }

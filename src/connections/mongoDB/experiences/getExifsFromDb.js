@@ -6,7 +6,7 @@ async function getExifs() {
   try {
     const exifs = await Exifs.find();
     return exifs
-  } catch {
+  } catch (err) {
     console.log(err.message);
   }
 }
