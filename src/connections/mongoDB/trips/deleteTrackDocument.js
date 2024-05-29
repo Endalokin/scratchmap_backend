@@ -6,7 +6,7 @@ async function deleteTrackDocument(trackid) {
   try {
     let track = await Tracks.deleteOne({_id: trackid});
     return track
-  } catch {
+  } catch (err) {
     console.log(err.message);
   }
 }

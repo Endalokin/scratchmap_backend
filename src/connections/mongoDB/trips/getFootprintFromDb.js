@@ -6,7 +6,7 @@ async function getFootprint() {
   try {
     const footprints = await Footprint.find();
     return footprints
-  } catch {
+  } catch (err) {
     console.log(err.message);
   }
 }

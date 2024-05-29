@@ -6,7 +6,7 @@ async function getTracks() {
   try {
     const tracks = await Tracks.find();
     return tracks
-  } catch {
+  } catch (err) {
     console.log(err.message);
   }
 }
