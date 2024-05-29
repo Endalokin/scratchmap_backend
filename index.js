@@ -5,8 +5,10 @@ import bodyParser from 'body-parser'
 import experienceRouter from "./src/router/experience_router.js"
 import tripRouter from "./src/router/trip_router.js"
 import authRouter from "./src/router/auth_router.js"
+import mongoRouter from "./src/router/mongo_router_example.js"
+import mongoTripRouter from "./src/router/mongo_router_trip.js"
 import fs from 'fs';
-import { pool } from './src/utils/db.js'
+import mongoExperienceRouter from "./src/router/mongo_experience_router.js"
 
 const app = express()
 
@@ -22,7 +24,10 @@ app.get("/test", (req, res) => {
 })
 
 app.use("/user", authRouter)
-app.use("/experiences", experienceRouter)
-app.use("/trips", tripRouter)
+app.use("/old/experiences", experienceRouter)
+app.use("/experiences", mongoExperienceRouter)
+app.use("/old/trips", tripRouter)
+app.use("/trips", mongoTripRouter)
+app.use("/mongoTest", mongoRouter)
 
 app.listen(8080, () => console.log("listening on 8080"))
